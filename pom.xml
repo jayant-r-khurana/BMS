@@ -37,7 +37,7 @@
 						<environment>Sandbox</environment>
 						<workers>1</workers>
 						<workerType>Micro</workerType>
-						<applicationName>bookmyshow-process-api</applicationName>
+						<applicationName>Test</applicationName>
 						<muleVersion>4.4.0</muleVersion>
 						<password>Assignment@123</password>
 						<objectStoreV2>true</objectStoreV2>
