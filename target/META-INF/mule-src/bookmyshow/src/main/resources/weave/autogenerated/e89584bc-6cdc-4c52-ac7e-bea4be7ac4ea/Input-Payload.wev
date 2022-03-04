@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_e89584bc_6cdc_4c52_ac7e_bea4be7ac4ea_Input_Payload = Array<{  scheduledTime: String,   city: String,   availableSeats: Number,   price: Number,   theatreName: String,   movieName: String,   _?: Any}>
+

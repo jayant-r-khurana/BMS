@@ -1,0 +1,11 @@
+{
+    "userId": "825428453",
+    "city": "Mumbai",
+    "theatre": "PVR Cinemas",
+    "movie": "A Thursday",
+    "language": "Hindi",
+    "timing": "2022-02-25T12:00:00",
+    "numberOfTickets": 4,
+    "seatNumbers": "11,12,13,14",
+    "ticketPrice": 350
+  }

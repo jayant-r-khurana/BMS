@@ -1,0 +1,23 @@
+%dw 2.0
+
+type auto_3f0c758b_2a0c_481f_a1b8_5eb2d7ada6d0_Output_Payload = {
+  seatNumbers: String, 
+  bookingTime: String, 
+  movie: String, 
+  city: String, 
+  paymentMode: String, 
+  timing: String, 
+  discount: Number, 
+  language: String, 
+  userName: String, 
+  userId: String, 
+  payableAmount: Number, 
+  bookingId: String, 
+  theatre: String, 
+  totalAmount: Number, 
+  numberOfTickets: Number, 
+  userMobile: String, 
+  bookingStatus: String, 
+  _?: Any
+}
+

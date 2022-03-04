@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:bmsmmapi="http://www.mulesoft.org/schema/mule/bmsmmapi" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/bmsmmapi http://www.mulesoft.org/schema/mule/bmsmmapi/current/mule-bmsmmapi.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="getETicket" doc:id="a07186dc-7a8a-48bd-b9a6-069ea4b614af" >
+		<set-variable value="#[attributes.queryParams.bookingId]" doc:name="Set BookingId" doc:id="c0d5f265-1f1d-490c-9f03-f31d0ccda038" variableName="bookingId"/>
+		<ee:transform doc:name="Transform Message" doc:id="0a6f289d-fc1f-4aa2-b248-5d352606c608" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://soap.training.mulesoft.com/
+---
+{
+	ns0#getTicket: {
+		userId: attributes.queryParams.userId,
+		bookingId: attributes.queryParams.bookingId
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="6dd1215b-0442-4ada-92b7-8fcc3b1cf3c1" config-ref="JSON_Logger_Config" message="Get ETicket Request"/>
+		<wsc:consume operation="getTicket" doc:name="Consume" doc:id="74020661-a6b9-40bc-9a57-74193e71c475" config-ref="Web_Service_Consumer_Config">
+		</wsc:consume>
+		<json-logger:logger doc:name="Logger" doc:id="922635dc-938d-4bdd-abb6-891a27412925" config-ref="JSON_Logger_Config" message="Get ETicket Response" tracePoint="END" />
+		<ee:transform doc:name="Transform Message" doc:id="711841e1-6f62-4068-8767-350d40d9e9bc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0output application/json
+---
+payload.body.bookTicketResponse]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-not-null doc:name="Is not null" doc:id="2b0bff8f-b7d9-4128-89db-f3f0cb0f7cf7" value="#[payload]" message='#["Ticket not found for BookingId: " ++ vars.bookingId]'/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ae3f55f2-a33c-4c32-a92a-6e22bec9e0ba" type="WSC:BAD_REQUEST, WSC:BAD_RESPONSE, WSC:CANNOT_DISPATCH, WSC:CONNECTIVITY, WSC:ENCODING, WSC:INVALID_WSDL, WSC:RETRY_EXHAUSTED, WSC:SOAP_FAULT, WSC:TIMEOUT">
+				<ee:transform doc:name="Transform Message" doc:id="63c34d5a-2d26-4163-86da-e1b2fae604b1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Internal server error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5b1ce32a-958a-489b-8db2-4438b505e0c6" type="VALIDATION:NULL">
+				<ee:transform doc:name="Set Error Description" doc:id="d7483ce7-4f29-4ec6-82d5-87d511972f1f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="Set Http Status" doc:id="d700a76e-cdde-496a-a4e1-07e4808e7f2c" variableName="httpStatus"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="getOrderHistory" doc:id="aecab3a3-f304-4ed4-99eb-9d42c138709d" >
+		<ee:transform doc:name="Transform Message" doc:id="c0438a42-a1ea-4e2d-b68b-341d02c463d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://soap.training.mulesoft.com/
+---
+{
+	ns0#getOrderHistory: {
+		userId: attributes.queryParams.userId
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="031c930e-f645-43d2-a3ae-0d961d627f6c" config-ref="JSON_Logger_Config" message="Get orderHistory Request"/>
+		<wsc:consume doc:name="Consume" doc:id="e223909b-2b85-4599-83a9-0a8fef197beb" operation="getOrderHistory" config-ref="Web_Service_Consumer_Config"/>
+		<json-logger:logger doc:name="Logger" doc:id="30bef609-f10b-496e-b832-b8af98a99b7f" config-ref="JSON_Logger_Config" message="Get orderHistory Response" tracePoint="END" />
+		<ee:transform doc:name="Transform Message" doc:id="4ce090bb-2a59-4464-9eb3-609c45c1d11b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.body.getOrderHistoryResponse.*order]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="b88d08fc-3c03-428f-86fa-0f74e5d74550" message="No Records Found"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="faec9b6c-a2d2-4ca3-acb2-8ba84d1516aa" type="WSC:BAD_REQUEST, WSC:BAD_RESPONSE, WSC:CANNOT_DISPATCH, WSC:CONNECTIVITY, WSC:ENCODING, WSC:INVALID_WSDL, WSC:RETRY_EXHAUSTED, WSC:SOAP_FAULT, WSC:TIMEOUT">
+				<ee:transform doc:name="Transform Message" doc:id="19690908-c8c4-4589-8e4d-9364401db69f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Internal server error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6c02d108-7404-4171-819b-108a6545606f" type="VALIDATION:EMPTY_COLLECTION">
+				<ee:transform doc:name="Set Error Description" doc:id="64c0085d-d57a-4dae-9d0d-95909e791214" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="200" doc:name="Set Http Status" doc:id="4b91601d-52c0-42ac-a525-d96951535d84" variableName="httpStatus" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="getMovies" doc:id="4f22d7a1-7df8-4a44-9536-13041b537563" >
+		<validation:is-true doc:name="Is true" doc:id="bcb6f218-f3cb-458b-9142-44f25e04c1e3" expression="#[['Mumbai','Bangalore','Delhi','Pune','Chandigarh'] contains attributes.queryParams.city]" message="#['Selected city ' ++ attributes.queryParams.city ++ ' is invalid.']"/>
+		<http:request method="GET" doc:name="Request" doc:id="77013a5c-77b8-4cb4-aaca-0f75291d4d0f" config-ref="HTTP_Request_configuration" path="/movies">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"city" : attributes.queryParams.city default "Mumbai"
+}]]]></http:query-params>
+		</http:request>
+		<json-logger:logger doc:name="Logger" doc:id="9296b4fd-6285-4b42-93ef-853cc2385ccf" config-ref="JSON_Logger_Config" message="Get movies response"/>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="666037e6-1fa6-43f6-b750-6dcfa89d0cf1" type="VALIDATION:INVALID_BOOLEAN">
+				<ee:transform doc:name="Set Error Description" doc:id="d3dba51c-7eb4-4e59-a400-0e7954cc25f4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message" : error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="Set Http Status" doc:id="29a629cc-df35-4ea5-a4fe-5b7d74035bf0" variableName="httpStatus"/>
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1f5287cc-9496-4cbf-a77f-af126f7d778a" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform doc:name="Transform Message" doc:id="87724e9b-9568-4890-be6d-b0b3e4ad8e0a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Internal server error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="getMovie" doc:id="e89584bc-6cdc-4c52-ac7e-bea4be7ac4ea" >
+		<http:request method="GET" doc:name="Request" doc:id="67b46682-6010-455c-9bb7-11b616433c47" config-ref="HTTP_Request_configuration" path="/movies/{movie}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"movie" : attributes.uriParams.movie
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"city" : attributes.queryParams.city default "Mumbai"
+}]]]></http:query-params>
+		</http:request>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="125cb7f0-8f91-4fb4-992d-4031d2c52dd9" message="No movies found"/>
+		<json-logger:logger doc:name="Logger" doc:id="7fd62bc5-7d82-46e8-9cd7-889b3ed726d1" config-ref="JSON_Logger_Config" message="Get Movie Response"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="8158c13c-d58f-419c-ac84-2e5306baa510" type="VALIDATION:EMPTY_COLLECTION">
+				<ee:transform doc:name="Set Error Description" doc:id="3c706701-46fa-4dfd-9e24-187a3f1c823b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="200" doc:name="Set Http Status" doc:id="5b1505c2-8ba2-4c6e-a0f3-0388366bdf29" variableName="httpStatus"/>
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="df25b8fb-b62e-466d-b92b-44aa887d2838" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform doc:name="Transform Message" doc:id="d7e284bb-c193-4c3e-afff-cdb7e93a6a71" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Internal server error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="bookTicket" doc:id="3f0c758b-2a0c-481f-a1b8-5eb2d7ada6d0" >
+		<validation:is-true doc:name="Check blank data" doc:id="ebb1dc1f-fefb-4b71-a07f-164fbde62fb7" expression="#[payload.userId != '' and payload.city != '' and payload.theatre != '' and payload.movie != '' and payload.language != '' and payload.timing != '' and payload.numberOfTickets != '' and payload.seatNumbers != '' and payload.ticketPrice != '']" message="Kindly provide all required data."/>
+		<validation:is-true doc:name="Validate number of Seats" doc:id="5da6b97f-00d4-477f-a145-ed4c344574ca" expression="#[ payload.numberOfTickets &gt; 0 ]" message="Invalid number of tickets."/>
+		<ee:transform doc:name="Transform Message" doc:id="ae894ab7-eec4-4072-8b3f-795f63275613" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://soap.training.mulesoft.com/
+---
+{
+	ns0#bookTicket: {
+		userId: payload.userId,
+		city: payload.city,
+		theatre: payload.theatre,
+		movie: attributes.uriParams.movie,
+		language: payload.language,
+		timing: payload.timing,
+		noOfTickets: payload.numberOfTickets,
+		seatNos: payload.seatNumbers,
+		ticketPrice: payload.ticketPrice,
+		discount: if(payload.numberOfTickets > 2) 100 else 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="4555ca3c-10dd-4c7c-9af0-d1997e610b55" config-ref="JSON_Logger_Config" message="Get bookTicket Request"/>
+		<wsc:consume doc:name="Consume" doc:id="ee1431f3-bf8d-473c-9cdd-6a7e0729ae39" operation="bookTicket" config-ref="Web_Service_Consumer_Config"/>
+		<json-logger:logger doc:name="Logger" doc:id="8258a0cc-855b-4be4-95e9-fd02328dbade" config-ref="JSON_Logger_Config" message="Get bookTicket Response" tracePoint="END"/>
+		<ee:transform doc:name="Transform Message" doc:id="4e1407de-13e7-4b55-bf81-8bf69724818f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.body.bookTicketResponse]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c3579139-804e-41e2-9d2f-f32dafaad4bb" type="WSC:BAD_REQUEST, WSC:BAD_RESPONSE, WSC:CANNOT_DISPATCH, WSC:CONNECTIVITY, WSC:ENCODING, WSC:INVALID_WSDL, WSC:RETRY_EXHAUSTED, WSC:SOAP_FAULT, WSC:TIMEOUT">
+				<ee:transform doc:name="Transform Message" doc:id="1c52a615-928e-4c0f-bbd7-31d1783ef1d2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message":"Internal Server Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="64033da0-356b-48de-a0b4-569ae538192d" type="VALIDATION:INVALID_BOOLEAN">
+				<ee:transform doc:name="Transform Message" doc:id="feda7a6c-00e8-402c-9d49-16571525ca05" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message":error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="Set Http Status" doc:id="0f0018bc-8305-45c0-9915-06f504e053c4" variableName="httpStatus"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

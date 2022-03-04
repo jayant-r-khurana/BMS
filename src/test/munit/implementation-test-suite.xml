@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-test-suite.xml" />
+	<munit:test name="implementation-test-suite-getMovies-test" doc:id="2bb70db5-db16-4bff-8aa3-1011257d21f7" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Request" doc:id="5b44c27c-5472-4b3a-b700-b1ba7e923e9d" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="77013a5c-77b8-4cb4-aaca-0f75291d4d0f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://getMoviestest\mock_payload.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://getMoviestest\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://getMoviestest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="892609fd-37c6-4fd0-80de-1b52c93f7228" >
+				<munit:payload value="#[readUrl('classpath://getMoviestest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getMoviestest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getMoviestest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getMovies" doc:id="43077294-1b56-49be-87b0-d852fe1df38d" name="getMovies"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c66b080b-a421-4e49-89d3-cf26e6f4df84" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getMoviestest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Is true" doc:id="9eb8fa41-da6d-4cc1-95b6-3f9204412ddf" processor="validation:is-true" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bcb6f218-f3cb-458b-9142-44f25e04c1e3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getETicketTest" doc:id="ad1e68c2-4afa-489a-a467-1d38d176d587" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="3c4c562e-d1a3-44d9-8885-fc44b5081462" >
+				<munit:attributes value="#[{ headers:&#10;		{ &#10;		'client_id' :  '246ea8525013459caaa076e9a9b2d63d',&#10;		'client_secret': 'C1eBD1E75aCD4dec8c8A57CB3B3506FE'&#10;		},&#10;queryParams:&#10; 	{ &#10;	'userId' :  '12345678',&#10;	'bookingId':'123456xyz'&#10;	}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getETicket" doc:id="0885f304-74c9-443e-b0a3-5753633a826e" name="getETicket"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1894dee2-aea8-407f-8e9a-12e4f43f960b" message="Payload is null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getMovieTest-negative" doc:id="c933314a-b1c1-4071-91fa-24b4c82ea4cc" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ced617f3-951f-4f81-9e65-04b80a0a052a" >
+				<munit:attributes value="#[{ headers:&#10;		{ &#10;		'client_id' :  '246ea8525013459caaa076e9a9b2d63d',&#10;		'client_secret': 'C1eBD1E75aCD4dec8c8A57CB3B3506FE'&#10;		},&#10;queryParams:&#10; 	{ &#10;	'city' :  'Mumbai'&#10;	},&#10;uriParams:&#10;{&#10;	'movie':'AThursday'&#10;}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getMovie" doc:id="4a3f8599-f3d0-4785-8f91-54af5568c829" name="getMovie"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="449d01fb-5938-499d-87c2-682097b56c9a" is="#[MunitTools::notNullValue()]" expression="#[payload]" message="Payload is null."/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getOrderHistoryTest" doc:id="85f27bcd-d5ab-4307-aed0-35c2659c5c6f" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="01f783d9-f10e-457e-9b2b-9b25a1af0ff3" >
+				<munit:attributes value="#[{ headers:&#10;		{ &#10;		'client_id' :  '246ea8525013459caaa076e9a9b2d63d',&#10;		'client_secret': 'C1eBD1E75aCD4dec8c8A57CB3B3506FE'&#10;		},&#10;queryParams:&#10; 	{ &#10;	'userId' :  '12345678'&#10;	}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getOrderHistory" doc:id="bcfdcd62-d734-4274-915f-dc2b2225dc65" name="getOrderHistory"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8c05187b-5d02-4d0a-a05f-72c3c845d468" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="Payload is null."/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-bookTicketTest" doc:id="56e45caf-9c62-4b97-b260-a3d6c977cac9" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="b175676f-9c5d-4004-bc65-8e677107078c" >
+				<munit:payload value='{&#10;    "userId": "825428453",&#10;    "city": "Mumbai",&#10;    "theatre": "PVR Cinemas",&#10;    "movie": "A Thursday",&#10;    "language": "Hindi",&#10;    "timing": "2022-02-25T12:00:00",&#10;    "numberOfTickets": 4,&#10;    "seatNumbers": "11,12,13,14",&#10;    "ticketPrice": 350&#10;  }' mediaType="application/json" />
+				<munit:attributes value="#[{ headers:&#10;		{ &#10;		'client_id' :  '246ea8525013459caaa076e9a9b2d63d',&#10;		'client_secret': 'C1eBD1E75aCD4dec8c8A57CB3B3506FE'&#10;		},&#10;queryParams:&#10; 	{ &#10;	'city' :  'Mumbai'&#10;	},&#10;uriParams:&#10;{&#10;	'movie':'A Thursday'&#10;}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to bookTicket" doc:id="094131f8-9ba2-400a-9c75-adc2874c0d04" name="bookTicket"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="293cac6f-eef6-44d0-8294-c797e70b9273" message="Payload is null." expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getMoviesTest_Negative" doc:id="0660de06-350c-47de-a5e8-a9b4aa13fa3c" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="2c4db5cc-01cf-471e-ae42-1069d0fbb1d4" >
+				<munit:attributes value="#[{ headers:&#10;		{ &#10;		'client_id' :  '246ea8525013459caaa076e9a9b2d63d',&#10;		'client_secret': 'C1eBD1E75aCD4dec8c8A57CB3B3506FE'&#10;		},&#10;queryParams:&#10; 	{ &#10;	'city' :  'MumbaiA'&#10;	}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getMovies" doc:id="df4e2e2f-87a9-48ad-899f-5a28f3f61cbe" name="getMovies" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d4c67ab1-0edb-42df-a2f8-71b6789e554b" message="Payload is null." expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getMovie-test" doc:id="ab0e4416-7394-4671-a2f2-f556a608f803">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Request" doc:id="a02878d7-ea50-4724-982a-6f93d56039b5" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="67b46682-6010-455c-9bb7-11b616433c47" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://getMovietest\mock_payload.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://getMovietest\mock_attributes.dwl')]" />
+					<munit-tools:variables>
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://getMovietest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="b5e55e65-1769-45b4-9341-bd5556c0986c">
+				<munit:payload value="#[readUrl('classpath://getMovietest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getMovietest\set-event_attributes.dwl')]" />
+				<munit:variables>
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getMovietest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to getMovie" doc:id="22563e60-126c-4f43-bb3e-17b9a9187b1a" name="getMovie" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert doc:name="Assert payload" doc:id="46804cb0-4dbc-488c-b471-84c6b861382c" message="The payload does not match">
+				<munit-tools:that><![CDATA[#[%dw 2.0
+import getMovietest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Is not empty collection" doc:id="ee639e3a-35bc-45fb-bc45-266b8efc8df8" processor="validation:is-not-empty-collection" times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="125cb7f0-8f91-4fb4-992d-4031d2c52dd9" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:bmsmmapi="http://www.mulesoft.org/schema/mule/bmsmmapi"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/bmsmmapi http://www.mulesoft.org/schema/mule/bmsmmapi/current/mule-bmsmmapi.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<http:listener-config name="httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="bf00069e-bddb-4fd8-be0b-16796b0d74a0">
+		<wsc:connection wsdlLocation="${wsdl.location}" service="${wsdl.service}" port="${wsdl.port}">
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="da9beb87-da76-4d5b-9e0b-e9b7e97b0760" file="config.yaml" />
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="12879880-f0ef-423d-8d6a-3519a4636611" environment="Dev" contentFieldsDataMasking="userName" applicationName="BookMyShow" applicationVersion="1.0.0" disabledFields="correlationId" logLocationInfo="false"/>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="facd3875-daa1-4bc0-a244-2dc0aea99e47" basePath="${movie.basepath}" >
+		<http:request-connection host="${movie.host}" port="${movie.port}" />
+	</http:request-config>	
+
+</mule>

@@ -1,0 +1,16 @@
+http:
+  port: "8081"
+
+movie:
+  host: "bms-movie-management.us-e2.cloudhub.io"
+  port: "80"
+  protocol: "HTTP"
+  basepath: "/api"
+  
+wsdl:
+  location: "http://bms-order-management.us-e2.cloudhub.io/Order/Ticket?wsdl"
+  service: "Order"
+  port: "Ticket"
+  
+mule:
+  environment: "DEV"
